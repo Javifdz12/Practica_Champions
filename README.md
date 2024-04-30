@@ -8,6 +8,7 @@ En ella hay una carpeta (src) la cual contine:
 - Archivo Pesos_Champions.best.hdf5: que son los pesos del modelo que se ha entrenado para calcular en un partido la probabilidad de que gane el local, gane el visitante o empaten.
 - Preprocessor.pkl: que son las transformaciones que se han aplicado a los datos para que puedan entrar en el modelo.
 - Archivo requirements.txt: que contiene las librerias necesarias y sus versiones.
+
 También contiene un .env que contiene el MONGO_URI correspondiente a mi cluster de mongodb, pero este no lo he añadido por temas de seguridad. Además la carpeta del venv tampoco la he añadido,
 ya que era demasiado pesada para meterla en el repositorio.
 En linux, para levantar la API hay que:
