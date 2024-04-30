@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Casa de Apuestas Clandestina</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+  }
+  .header {
+    background-color: #444;
+    color: white;
+    padding: 20px;
+    width: 100%;
+    text-align: center;
+  }
+  .match-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+  }
+  .match-box {
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    padding: 10px;
+  }
+  .team-box {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 5px;
+    cursor: pointer;
+  }
+  .selected {
+    background-color: #8f8;  /* Verde claro */
+  }
+  .selections-box {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    border: 1px solid #ddd;
+    padding: 10px;
+    background-color: white;
+  }
+  .selections-title, .final-odds, .bet-calculator {
+    font-weight: bold;
+  }
+  .bet-amount {
+    margin: 5px;
+    font-size: 16px;
+    width: 40px;
+    text-align: center;
+  }
+  .amount-controls {
+    display: inline-block;
+    margin-left: 10px;
+  }
+  .remove-selection {
+    cursor: pointer;
+    color: red;
+    margin-left: 10px;
+    font-weight: bold;
+  }
+</style>
+<script>
+  function updateFinalOdds() {
+    let finalOdds = 1;
+    document.querySelectorAll('.selected').forEach(box => {
+      const odds = parseFloat(box.textContent.split(' - ').pop());
+      finalOdds *= odds;
+    });
+    document.getElementById('final-odds').textContent = `Cuota Final: ${finalOdds.toFixed(2)}`;
+    calculatePotentialWin(); // Update potential win amount whenever odds are updated
+  }
+
+  function selectOutcome(matchId, teamType, odds) {
+    const localTeam = document.getElementById(`match-${matchId}-local`).textContent.split(' - ')[0];
+    const visitorTeam = document.getElementById(`match-${matchId}-visitor`).textContent.split(' - ')[0];
+    const selectedOutcome = `${localTeam} vs ${visitorTeam} - ${odds}`;
+    const typeText = teamType === 'local' ? 'Gana Local' : (teamType === 'draw' ? 'Empate' : 'Gana Visitante');
+
+    const selectionId = `selection-${matchId}`;
+    let selectionDiv = document.getElementById(selectionId);
+    
+    if (!selectionDiv) {
+      selectionDiv = document.createElement('div');
+      selectionDiv.id = selectionId;
+      document.getElementById('selections-box').appendChild(selectionDiv);
+    }
+    selectionDiv.innerHTML = `<div>${selectedOutcome}</div><div>${typeText}</div><span class='remove-selection' onclick='removeSelection(${matchId}, "${teamType}")'>✖</span>`;
+
+    const teamBoxes = document.querySelectorAll(`#match-${matchId} .team-box`);
+    teamBoxes.forEach(box => {
+      box.classList.remove('selected');
+    });
+    document.getElementById(`match-${matchId}-${teamType}`).classList.add('selected');
+
+    updateFinalOdds();  // Update the final odds whenever a selection is made or changed
+  }
+
+  function adjustAmount(increment) {
+    const betAmountInput = document.getElementById('bet-amount');
+    let betAmount = parseInt(betAmountInput.value);
+    if (increment) {
+      betAmount += 1;
+    } else if (betAmount > 1) {
+      betAmount -= 1;
+    }
+    betAmountInput.value = betAmount;
+    calculatePotentialWin(); // Recalculate potential win amount after adjusting the bet amount
+  }
+
+  function calculatePotentialWin() {
+    const odds = parseFloat(document.getElementById('final-odds').textContent.split(': ')[1]);
+    const betAmount = parseInt(document.getElementById('bet-amount').value);
+    const potentialWin = (odds * betAmount).toFixed(2);
+    document.getElementById('potential-win').textContent = `Potencial Ganancia: ${potentialWin} €`;
+  }
+
+  function removeSelection(matchId, teamType) {
+    const selectionId = `selection-${matchId}`;
+    const selectionDiv = document.getElementById(selectionId);
+    if (selectionDiv) {
+      selectionDiv.parentNode.removeChild(selectionDiv);
+    }
+    document.getElementById(`match-${matchId}-${teamType}`).classList.remove('selected');
+    updateFinalOdds();
+  }
+</script>
+</head>
+<body>
+<div class="header">Casa de Apuestas Clandestina</div>
+
+<div class="match-container">
+  {% for partido in partidos %}
+  <div class="match-box" id="match-{{ loop.index }}">
+    <div id="match-{{ loop.index }}-local" class="team-box" onclick="selectOutcome({{ loop.index }}, 'local', '{{ partido.cuota_local }}')">{{ partido.Local }} - {{ partido.cuota_local }}</div>
+    <div id="match-{{ loop.index }}-draw" class="team-box" onclick="selectOutcome({{ loop.index }}, 'draw', '{{ partido.cuota_empate }}')">Empate - {{ partido.cuota_empate }}</div>
+    <div id="match-{{ loop.index }}-visitor" class="team-box" onclick="selectOutcome({{ loop.index }}, 'visitor', '{{ partido.cuota_visitante }}')">{{ partido.Visitante }} - {{ partido.cuota_visitante }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+<div id="selections-box" class="selections-box">
+  <div class="selections-title">Apuesta</div>
+  <div id="final-odds" class="final-odds"></div>
+  <div class="bet-calculator">
+    <input id="bet-amount" class="bet-amount" type="number" value="1" readonly>
+    <div class="amount-controls">
+      <button onclick="adjustAmount(true)">+</button>
+      <button onclick="adjustAmount(false)">-</button>
+    </div>
+  </div>
+  <div id="potential-win" class="final-odds"></div>
+</div>
+
+</body>
+</html>
+
