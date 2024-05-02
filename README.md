@@ -18,6 +18,7 @@ En linux, para levantar la API hay que:
 - Instalar las dependecias: pip install -r requirements.txt
 - Crear .env con MONGO_URI en su interior: MONGO_URI="aqui va tu MONGO_URI"
 - Ejecutar archivo app.py: python3 app.py o también python app.py
+  
 Ahora deberias ver la API desplegada en 127.0.0.1:5000 (al menos a mi se me despliega ahí, en tu caso deberás comprobar donde se está desplegando porque alomejor no es la misma dirección)
 
 En las imágenes se puede obserbar como debería salirte en el navegador la API y algunas de sus funcionalidades.
